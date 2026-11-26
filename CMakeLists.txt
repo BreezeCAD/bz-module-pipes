@@ -19,3 +19,11 @@ endif()
 
 install(TARGETS bz_pipes RUNTIME DESTINATION . LIBRARY DESTINATION .)
 install(FILES module.json DESTINATION .)
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(sketch3d_test tests/sketch3d_test.cpp sketch3d.cpp)
+    target_compile_features(sketch3d_test PRIVATE cxx_std_20)
+    target_include_directories(sketch3d_test PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_test(NAME sketch3d COMMAND sketch3d_test)
+endif()
