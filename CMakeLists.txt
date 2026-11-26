@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.20)
+project(bz_module_pipes LANGUAGES CXX)
+
+set(BREEZECAD_SOURCE_DIR "" CACHE PATH "BreezeCAD source checkout")
+if(NOT EXISTS "${BREEZECAD_SOURCE_DIR}/src/modules/bz_module.h")
+    message(FATAL_ERROR "Set BREEZECAD_SOURCE_DIR to a BreezeCAD source checkout")
+endif()
+
+add_library(bz_pipes SHARED module.cpp)
+target_compile_features(bz_pipes PRIVATE cxx_std_20)
+target_include_directories(bz_pipes PRIVATE "${BREEZECAD_SOURCE_DIR}/src")
+set_target_properties(bz_pipes PROPERTIES CXX_VISIBILITY_PRESET hidden)
+if(MSVC)
+    target_compile_options(bz_pipes PRIVATE /utf-8)
+elseif(MINGW)
+    set_target_properties(bz_pipes PROPERTIES PREFIX "")
+    target_link_options(bz_pipes PRIVATE -static)
+endif()
+
+install(TARGETS bz_pipes RUNTIME DESTINATION . LIBRARY DESTINATION .)
+install(FILES module.json DESTINATION .)
