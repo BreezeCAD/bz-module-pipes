@@ -1,0 +1,44 @@
+name: Windows module package
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: BreezeCAD/breezecad
+          ref: ae460e326a1b65c41c54e4ab781a324dc9c3f590
+          path: breezecad-sdk
+          persist-credentials: false
+      - name: Build and test
+        shell: pwsh
+        run: |
+          cmake -S . -B build -A x64 "-DBREEZECAD_SOURCE_DIR=$pwd/breezecad-sdk"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build --config Release
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ctest --test-dir build -C Release --output-on-failure
+      - name: Package module
+        shell: pwsh
+        run: |
+          cmake --install build --config Release --prefix stage
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $manifest = Get-Content -LiteralPath stage/module.json -Raw | ConvertFrom-Json
+          $name = "bz-module-$($manifest.id)-$($manifest.version)-windows-x64"
+          Compress-Archive -LiteralPath @('stage/module.json', 'stage/bz_pipes.dll') -DestinationPath "$name.zip"
+          Move-Item -LiteralPath "$name.zip" -Destination "$name.bzmod"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bz-module-pipes-windows-x64
+          path: '*.bzmod'
+          if-no-files-found: error
