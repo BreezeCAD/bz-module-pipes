@@ -1,0 +1,9 @@
+{
+  "id": "pipes",
+  "name": "Трубы и трубопроводы",
+  "description": "Трубы и трубопроводы для сборок BreezeCAD",
+  "version": "0.2.0",
+  "abiVersion": 1,
+  "library": "bz_pipes",
+  "enabledByDefault": true
+}
